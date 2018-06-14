@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace Epi_AddIn.Properties {
+    using System;
     
     
     /// <summary>
@@ -18,7 +19,7 @@ namespace Epi_AddIn.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -56,6 +57,46 @@ namespace Epi_AddIn.Properties {
             }
             set {
                 resourceCulture = value;
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap data_clipart_free_business_clipart_collection {
+            get {
+                object obj = ResourceManager.GetObject("data-clipart-free-business-clipart-collection", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap data_protection {
+            get {
+                object obj = ResourceManager.GetObject("data-protection", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap masking_1 {
+            get {
+                object obj = ResourceManager.GetObject("masking-1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap sign_check_icon {
+            get {
+                object obj = ResourceManager.GetObject("sign-check-icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
     }

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:netfx="http://schemas.microsoft.com/wix/NetFxExtension">
+  
+	<Product Id="*" Name="EpiAddIn_Installer" Language="1033" Version="1.0.0.0" Manufacturer="SETi" UpgradeCode="ddc02223-db86-44e0-b6a5-65e332920a57">
+		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+
+		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+
+    <Media Id="1" Cabinet="Epi_AddIn.cab" EmbedCab="yes"/>
+
+		<Feature Id="ProductFeature" Title="Epi Excel Add-In" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+      <ComponentRef Id="Registry_FriendlyName" />
+      <ComponentRef Id="Registry_Description" />
+      <ComponentRef Id="Registry_Manifest" />
+      <ComponentRef Id="Registry_LoadBehavior" />
+		</Feature>
+    
+    <UIRef Id="WixUI_Minimal" />
+    <WixVariable Id="WixUILicenseRtf" Value="EULA.rtf" />
+	</Product>
+
+	<Fragment>
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="ProgramFilesFolder">
+				<Directory Id="INSTALLFOLDER" Name="SETi Epi Software" />
+        <Component Id="Registry_FriendlyName">
+          <RegistryValue Id="RegKey_FriendlyName" Root="HKCU"
+                         Key="Software\Microsoft\Office\Excel\AddIns\Epi_AddIn"
+                         Name="FriendlyName"
+                         Value="Epi Add-In"
+                         Type="string" KeyPath="yes" />
+        </Component>
+        <Component Id="Registry_Description">
+          <RegistryValue Id="RegKey_Description" Root="HKCU"
+                         Key="Software\Microsoft\Office\Excel\AddIns\Epi_AddIn"
+                         Name="Description"
+                         Value="Epi AddIn for DB access"
+                         Type="string" KeyPath="yes" />
+        </Component>
+        <Component Id="Registry_Manifest">
+          <RegistryValue Id="RegKey_Manifest" Root="HKCU"
+                         Key="Software\Microsoft\Office\Excel\AddIns\Epi_AddIn"
+                         Name="Manifest" Value="[INSTALLFOLDER]Epi_AddIn.vsto|vstolocal"
+                         Type="string" KeyPath="yes" />
+        </Component>
+        <Component Id="Registry_LoadBehavior">
+          <RegistryValue Id="RegKey_LoadBehavior" Root="HKCU"
+                         Key="Software\Microsoft\Office\Excel\AddIns\Epi_AddIn"
+                         Name="LoadBehavior" Value="3"
+                         Type="integer" KeyPath="yes" />
+        </Component>
+			</Directory>
+		</Directory>
+	</Fragment>
+
+	<Fragment>
+		<ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <Component Id="Epi_AddIn_vsto_Component">
+        <File Id="Epi_AddIn_vsto" KeyPath="yes"
+              Name="Epi_AddIn.vsto" Source="$(var.AddinFiles)"></File>
+      </Component>
+      <Component Id="Epi_AddIn_dll_manifest_Component">
+        <File Id="Epi_AddIn_dll_manifest" KeyPath="yes"
+              Name="Epi_AddIn.dll.manifest" Source="$(var.AddinFiles)"></File>
+      </Component>
+      <Component Id="MSOfficeToolsCommon_dll_Component">
+        <File Id="MSOfficeToolsCommon_dll" KeyPath="yes"
+              Name="Microsoft.Office.Tools.Common.v4.0.Utilities.dll"
+              Source="$(var.AddinFiles)"></File>
+      </Component>
+      <Component Id="Epi_AddIn_dll_Component" >
+        <File Id="Epi_AddIn_dll" KeyPath="yes"
+              Name="Epi_AddIn.dll" Source="$(var.AddinFiles)" />
+      </Component>
+      <Component Id="MSOfficeToolsExcel_dll_Component">
+        <File Id="MSOfficeToolsExcel_dll" KeyPath="yes"
+              Name="Microsoft.Office.Tools.Excel.dll" Source="$(var.AddinFiles)"></File>
+      </Component>
+      <Component Id="Newtonsoft_Json_dll_Component" >
+        <File Id="Newtonsoft_Json_dll" KeyPath="yes"
+              Name="Newtonsoft.Json.dll" Source="$(var.AddinFiles)" />
+      </Component>
+      <Component Id="MySql_Data_dll_Component" >
+        <File Id="MySql_Data_dll" KeyPath="yes"
+              Name="MySql.Data.dll" Source="$(var.AddinFiles)" />
+      </Component>
+		</ComponentGroup>
+	</Fragment>
+</Wix>
