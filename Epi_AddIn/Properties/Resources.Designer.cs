@@ -63,6 +63,16 @@ namespace Epi_AddIn.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Button_Add {
+            get {
+                object obj = ResourceManager.GetObject("Button Add", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap data_clipart_free_business_clipart_collection {
             get {
                 object obj = ResourceManager.GetObject("data-clipart-free-business-clipart-collection", resourceCulture);

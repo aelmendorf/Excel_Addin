@@ -12,63 +12,82 @@ using System.Windows.Forms;
 using System.Threading.Tasks;
 using System.IO;
 using System.Threading;
+using System.Diagnostics;
+using System.Threading.Tasks.Dataflow;
+using Newtonsoft.Json;
+using MySql.Data.MySqlClient;
 
 namespace Epi_AddIn {
     public partial class Epi_Ribbon {
         private DB_EpiWrapper epiWrapper = new DB_EpiWrapper();
         private const string EWAT = "NewEWAT 2018.xlsb";
 
-        private void Epi_Ribbon_Load(object sender, RibbonUIEventArgs e) {
+        // The head of the dataflow network.
+        public ITargetBlock<string> headBlock = null;
+        private string server, uid, password, database, connectionString;
+        private static readonly int SPECTRUM_SIZE = 2048;
+        public static readonly int COLUMNCOUNT = 24;
 
+        private void Epi_Ribbon_Load(object sender, RibbonUIEventArgs e) {
+            server = "172.20.4.20";
+            uid = "aelmendorf";
+            password = "Drizzle123!";
+            database = "epi";
+            connectionString = "SERVER=" + server + ";" + "DATABASE=" +
+            database + ";" + "UID=" + uid + ";" + "PASSWORD=" + password + ";" + "SslMode=none";
         }
 
-       /* private async void getSpectrum_Click(object sender, RibbonControlEventArgs e) {
-            Excel.Range sel = Globals.ThisAddIn.Application.Selection as Excel.Range;
-            if(sel != null) {
-                this.getSpectrum.Enabled = false;
-                this.openEWAT.Enabled = false;
-                this.importBurn.Enabled = false;
-                List<string> wafers = new List<string>();
-                if(Globals.ThisAddIn.Application.ActiveWorkbook.Name == EWAT) {
-                    if(sel.Column == 2) {
-                        foreach(Excel.Range cell in sel.Cells) {
-                            if(cell.Value2 != null  && (string)cell.Value2!="") {
-                                wafers.Add((string)cell.Value2);
-                            }
-                        }
-                        if(wafers.Count > 0) {
-                            MessageBox.Show("Collecting Data" + Environment.NewLine + "new workbook will open when done");
+        /* private async void getSpectrum_Click(object sender, RibbonControlEventArgs e) {
+             Excel.Range sel = Globals.ThisAddIn.Application.Selection as Excel.Range;
+             if(sel != null) {
+                 this.getSpectrum.Enabled = false;
+                 this.openEWAT.Enabled = false;
+                 this.importBurn.Enabled = false;
+                 List<string> wafers = new List<string>();
+                 if(Globals.ThisAddIn.Application.ActiveWorkbook.Name == EWAT) {
+                     if(sel.Column == 2) {
+                         foreach(Excel.Range cell in sel.Cells) {
+                             if(cell.Value2 != null  && (string)cell.Value2!="") {
+                                 wafers.Add((string)cell.Value2);
+                             }
+                         }
+                         if(wafers.Count > 0) {
+                             MessageBox.Show("Collecting Data" + Environment.NewLine + "new workbook will open when done");
 
-                            if(SynchronizationContext.Current == null)
-                                SynchronizationContext.SetSynchronizationContext(new WindowsFormsSynchronizationContext());
-                            await this.GetSpectrumData(wafers.ToArray());
-                        }
-                    } else {
-                        MessageBox.Show("Please select from RunID Column and try again ");
-                    }//if EWAT file make sure that correct column is selected
-                } else {
-                    foreach(Excel.Range cell in sel.Cells) {
-                        if(cell.Value2 != null && (string)cell.Value2 != "") {
-                            wafers.Add((string)cell.Value2);
-                        }
-                    }
-                    if(wafers.Count > 0) {
-                        MessageBox.Show("Collecting Data" + Environment.NewLine + "new workbook will open when done");
+                             if(SynchronizationContext.Current == null)
+                                 SynchronizationContext.SetSynchronizationContext(new WindowsFormsSynchronizationContext());
+                             await this.GetSpectrumData(wafers.ToArray());
+                         }
+                     } else {
+                         MessageBox.Show("Please select from RunID Column and try again ");
+                     }//if EWAT file make sure that correct column is selected
+                 } else {
+                     foreach(Excel.Range cell in sel.Cells) {
+                         if(cell.Value2 != null && (string)cell.Value2 != "") {
+                             wafers.Add((string)cell.Value2);
+                         }
+                     }
+                     if(wafers.Count > 0) {
+                         MessageBox.Show("Collecting Data" + Environment.NewLine + "new workbook will open when done");
 
-                        if(SynchronizationContext.Current == null)
-                            SynchronizationContext.SetSynchronizationContext(new WindowsFormsSynchronizationContext());
-                        await this.GetSpectrumData(wafers.ToArray());
-                    }
-                }//End check file
-                this.getSpectrum.Enabled = true;
-                this.openEWAT.Enabled = true;
-                this.importBurn.Enabled = true;
-            } else {
-                MessageBox.Show("Invalid selection" + Environment.NewLine + "Please try selecting again");
-            }
-        }*/
+                         if(SynchronizationContext.Current == null)
+                             SynchronizationContext.SetSynchronizationContext(new WindowsFormsSynchronizationContext());
+                         await this.GetSpectrumData(wafers.ToArray());
+                     }
+                 }//End check file
+                 this.getSpectrum.Enabled = true;
+                 this.openEWAT.Enabled = true;
+                 this.importBurn.Enabled = true;
+             } else {
+                 MessageBox.Show("Invalid selection" + Environment.NewLine + "Please try selecting again");
+             }
+         }*/
 
         private void getSpectrum_Click(object sender, RibbonControlEventArgs e) {
+
+            Debug.WriteLine("Starting Original");
+            Stopwatch timer = new Stopwatch();
+            timer.Start();
             Excel.Range sel = Globals.ThisAddIn.Application.Selection as Excel.Range;
             if(sel != null) {
                 this.getSpectrum.Enabled = false;
@@ -112,6 +131,9 @@ namespace Epi_AddIn {
                 this.getSpectrum.Enabled = true;
                 this.openEWAT.Enabled = true;
                 this.importBurn.Enabled = true;
+                Debug.WriteLine("Done Original");
+                timer.Stop();
+                Debug.WriteLine("Time: {0}",timer.ElapsedMilliseconds);
             } else {
                 MessageBox.Show("Invalid selection" + Environment.NewLine + "Please try selecting again");
             }
@@ -193,5 +215,176 @@ namespace Epi_AddIn {
                 this.importBurn.Enabled = true;
             }//End check for selection
         }//End importBurn
+
+
+        private int Exist(string wafer, TEST_TYPE type) {
+            int retVal = 0;
+            try {
+                using(MySqlConnection connect = new MySqlConnection(connectionString)) {
+                    connect.Open();
+                    string query = "check";
+                    MySqlCommand cmd = new MySqlCommand(query, connect);
+                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                    cmd.Prepare();
+                    cmd.Parameters.AddWithValue("@wafer", wafer);
+                    cmd.Parameters.AddWithValue("@test", (int)type);
+                    cmd.Parameters.AddWithValue("?isentry", MySqlDbType.Int32);
+                    cmd.Parameters["?isentry"].Direction = System.Data.ParameterDirection.Output;
+                    cmd.ExecuteNonQuery();
+                    retVal = (int)cmd.Parameters["?isentry"].Value;
+                }
+                return retVal;
+            } catch(MySqlException ex) {
+                return -1;
+            }
+        }
+
+        private DataTable GetWaferSpectrum(string wafer, TEST_TYPE type) {
+            DataTable tbl = new DataTable();
+            try {
+                using(MySqlConnection connect = new MySqlConnection(connectionString)) {
+                    connect.Open();
+                    string query = "get_spectrum";
+                    MySqlCommand cmd = new MySqlCommand(query, connect);
+                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                    cmd.Prepare();
+                    cmd.Parameters.AddWithValue("@wafer", wafer);
+                    cmd.Parameters.AddWithValue("@test", (int)type);
+                    cmd.ExecuteNonQuery();
+                    using(MySqlDataAdapter adp = new MySqlDataAdapter(cmd)) {
+                        adp.Fill(tbl);
+                    }
+                }
+                return tbl;
+            } catch(MySqlException ex) {
+                return null;
+            }
+        }//End GetWaferSpectrum
+
+        private IEnumerable<Spectrum> ExtractSpectrum(DataTable dt) {
+            List<Spectrum> spectList = new List<Spectrum>();
+            double[] wl = new double[Spectrum.ARRAY_SIZE];
+            double[] inten = new double[Spectrum.ARRAY_SIZE];
+
+            int count = 0;
+            foreach(DataRow row in dt.Rows) {
+                foreach(DataColumn col in dt.Columns) {
+                    TEST_AREA area = col.ColumnName.GetTestArea();
+                    if(!DBNull.Value.Equals(row[col])) {
+
+                        if(col.ColumnName.Contains("WL")) {
+                            wl = JsonConvert.DeserializeObject<double[]>((string)row[col]);
+
+                        } else {
+                            inten = JsonConvert.DeserializeObject<double[]>((string)row[col]);
+                        }
+                    } else {
+                        if(col.ColumnName.Contains("WL")) {
+                            wl = new double[Spectrum.ARRAY_SIZE];
+
+                        } else {
+                            inten = new double[Spectrum.ARRAY_SIZE];
+                        }
+                    }
+                    count += 1;
+                    if(count % 2 == 1) {
+                        int cur = col.ColumnName.Contains("50mA") == false ? 20 : 50;
+                        try {
+                            spectList.Add(new Spectrum(area, cur,
+                                wl,
+                                inten));
+
+                        } catch(ArgumentNullException e) {
+
+                        }
+                    }
+                }
+            }//End transpose/convert
+            return spectList;
+        }//End Extract Spectrums
+
+        public ITargetBlock<string> Run() {
+
+
+            if(SynchronizationContext.Current == null)
+                SynchronizationContext.SetSynchronizationContext(new WindowsFormsSynchronizationContext());
+
+
+            TransformBlock<string, DataTable> loadWafers = new TransformBlock<string, DataTable>(
+                w => {
+                    return GetWaferSpectrum(w, TEST_TYPE.INITIAL);
+                });
+
+            TransformBlock<DataTable, IEnumerable<Spectrum>> convert = new TransformBlock<DataTable, IEnumerable<Spectrum>>(
+                dt => {
+                    return ExtractSpectrum(dt);
+                });
+
+            ActionBlock<IEnumerable<Spectrum>> display = new ActionBlock<IEnumerable<Spectrum>>(list => {
+                List<Spectrum> tmp = list.ToList<Spectrum>();
+                Globals.ThisAddIn.Application.Calculation = Excel.XlCalculation.xlCalculationManual;
+                Excel.Application ExcelApp = ((Excel.Application)Globals.ThisAddIn.Application);
+                var wb = ExcelApp.Workbooks.Add();
+                ExcelApp.Visible = true;
+                Excel._Worksheet ws = wb.Sheets.Add();
+                ws.Name = "TestBlock";
+
+                for(int i = 0; i < tmp.Count; i += 2) {
+                    int count = tmp[i].Wl.Length;
+                    object[] wl_obj = new object[count];
+                    object[] int_obj = new object[count];
+
+                    for(int x = 0; x < count; x++) {
+                        wl_obj[x] = tmp[i].Wl[x];
+                        int_obj[x] = tmp[i].Intensity[x];
+                    }
+                        
+                       
+                    Excel.Range wl = ws.get_Range((Excel.Range)(ws.Cells[1, i]), (Excel.Range)(ws.Cells[count, i]));
+                    Excel.Range intensity = ws.get_Range((Excel.Range)(ws.Cells[1, i]), (Excel.Range)(ws.Cells[count, i]));
+                    wl.Value = tmp[i].Wl;
+                    intensity.Value = tmp[i].Intensity;
+                }
+                Globals.ThisAddIn.Application.Calculation = Excel.XlCalculation.xlCalculationSemiautomatic;
+            },
+           // Specify a task scheduler from the current synchronization context
+           // so that the action runs on the UI thread.
+           new ExecutionDataflowBlockOptions {
+               TaskScheduler = TaskScheduler.FromCurrentSynchronizationContext()
+           });
+
+            loadWafers.LinkTo(convert);
+            convert.LinkTo(display);
+            //loadWafers.Post(wafer);
+            return loadWafers;
+        }
+
+        private void getSpectrum_DataFlow_Click(object sender, RibbonControlEventArgs e) {
+            Dataflow_Wrapper dataflow = new Dataflow_Wrapper();
+            Debug.WriteLine("Starting Dataflow");
+            Stopwatch timer = new Stopwatch();
+            timer.Start();
+            Excel.Range sel = Globals.ThisAddIn.Application.Selection as Excel.Range;
+            if(sel != null) {
+                this.getSpectrum.Enabled = false;
+                this.openEWAT.Enabled = false;
+                this.importBurn.Enabled = false;
+                List<string> wafers = new List<string>();
+                foreach(Excel.Range cell in sel.Cells) {
+                    if(cell.Value2 != null && (string)cell.Value2 != "") {
+                        if(epiWrapper.Exist((string)cell.Value2, TEST_TYPE.INITIAL) == 1) {
+                            wafers.Add((string)cell.Value2);
+                        }
+                    }
+                }//End loop through selection
+                MessageBox.Show("Collecting Data" + Environment.NewLine + "new workbook will open when done");
+                dataflow.Run(wafers[0]);
+                this.headBlock = this.Run();
+                this.headBlock.Post(wafers[0]);
+            }
+            Debug.WriteLine("Done DataFlow");
+            timer.Stop();
+            Debug.WriteLine("Time: {0}", timer.ElapsedMilliseconds);
+        }
     }//End ribbon
 }

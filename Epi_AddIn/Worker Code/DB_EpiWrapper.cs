@@ -12,8 +12,8 @@ using MySql.Data.MySqlClient;
 using System.Collections;
 
 namespace Epi_AddIn.Worker_Code {
-    public enum TEST_TYPE { AFTER = 2, INITIAL = 1 };
-    public enum TEST_AREA { CENTERA = 1, CENTERB = 2, CENTERC = 3, RIGHT = 4, TOP = 5, LEFT = 6 };
+    //public enum TEST_TYPE { AFTER = 2, INITIAL = 1 };
+    //public enum TEST_AREA { CENTERA = 1, CENTERB = 2, CENTERC = 3, RIGHT = 4, TOP = 5, LEFT = 6 };
 
     public class DB_EpiWrapper {
         private string server, uid, password, database, connectionString;
@@ -331,5 +331,8 @@ namespace Epi_AddIn.Worker_Code {
             }//End DataSet loop through
             Globals.ThisAddIn.Application.Calculation = ExcelApp.XlCalculation.xlCalculationSemiautomatic;
         }//End out to excel
+
+        //public void OutToExcel()
+
     }
 }
