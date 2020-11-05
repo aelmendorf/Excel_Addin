@@ -31,14 +31,14 @@
             Microsoft.Office.Tools.Ribbon.RibbonBox box1;
             Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl1 = this.Factory.CreateRibbonDropDownItem();
             Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl2 = this.Factory.CreateRibbonDropDownItem();
+            this.importBurn = this.Factory.CreateRibbonButton();
             this.epi_tab_1 = this.Factory.CreateRibbonTab();
             this.gatherData = this.Factory.CreateRibbonGroup();
+            this.getSpectrum = this.Factory.CreateRibbonButton();
             this.commonFiles = this.Factory.CreateRibbonGroup();
+            this.openEWAT = this.Factory.CreateRibbonButton();
             this.importBurnIn = this.Factory.CreateRibbonGroup();
             this.testType = this.Factory.CreateRibbonComboBox();
-            this.getSpectrum = this.Factory.CreateRibbonButton();
-            this.openEWAT = this.Factory.CreateRibbonButton();
-            this.importBurn = this.Factory.CreateRibbonButton();
             this.group1 = this.Factory.CreateRibbonGroup();
             this.getSpectrum_DataFlow = this.Factory.CreateRibbonButton();
             box1 = this.Factory.CreateRibbonBox();
@@ -55,6 +55,15 @@
             box1.Items.Add(this.importBurn);
             box1.Name = "box1";
             // 
+            // importBurn
+            // 
+            this.importBurn.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.importBurn.Image = global::Epi_AddIn.Properties.Resources.data_clipart_free_business_clipart_collection;
+            this.importBurn.Label = "Import Data";
+            this.importBurn.Name = "importBurn";
+            this.importBurn.ShowImage = true;
+            this.importBurn.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.importBurn_Click);
+            // 
             // epi_tab_1
             // 
             this.epi_tab_1.Groups.Add(this.gatherData);
@@ -70,11 +79,31 @@
             this.gatherData.Label = "Gather Data";
             this.gatherData.Name = "gatherData";
             // 
+            // getSpectrum
+            // 
+            this.getSpectrum.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.getSpectrum.Image = global::Epi_AddIn.Properties.Resources.masking_1;
+            this.getSpectrum.Label = "Get Spectrum Data";
+            this.getSpectrum.Name = "getSpectrum";
+            this.getSpectrum.ShowImage = true;
+            this.getSpectrum.SuperTip = "Select wafers then press";
+            this.getSpectrum.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.getSpectrum_Click);
+            // 
             // commonFiles
             // 
             this.commonFiles.Items.Add(this.openEWAT);
             this.commonFiles.Label = "Open Common Files";
             this.commonFiles.Name = "commonFiles";
+            // 
+            // openEWAT
+            // 
+            this.openEWAT.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.openEWAT.Image = global::Epi_AddIn.Properties.Resources.data_protection;
+            this.openEWAT.Label = "Open EWAT";
+            this.openEWAT.Name = "openEWAT";
+            this.openEWAT.ShowImage = true;
+            this.openEWAT.SuperTip = "Opens EWAT Database";
+            this.openEWAT.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.openEWAT_Click);
             // 
             // importBurnIn
             // 
@@ -94,35 +123,6 @@
             this.testType.Name = "testType";
             this.testType.ShowImage = true;
             this.testType.Text = null;
-            // 
-            // getSpectrum
-            // 
-            this.getSpectrum.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.getSpectrum.Image = global::Epi_AddIn.Properties.Resources.masking_1;
-            this.getSpectrum.Label = "Get Spectrum Data";
-            this.getSpectrum.Name = "getSpectrum";
-            this.getSpectrum.ShowImage = true;
-            this.getSpectrum.SuperTip = "Select wafers then press";
-            this.getSpectrum.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.getSpectrum_Click);
-            // 
-            // openEWAT
-            // 
-            this.openEWAT.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.openEWAT.Image = global::Epi_AddIn.Properties.Resources.data_protection;
-            this.openEWAT.Label = "Open EWAT";
-            this.openEWAT.Name = "openEWAT";
-            this.openEWAT.ShowImage = true;
-            this.openEWAT.SuperTip = "Opens EWAT Database";
-            this.openEWAT.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.openEWAT_Click);
-            // 
-            // importBurn
-            // 
-            this.importBurn.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.importBurn.Image = global::Epi_AddIn.Properties.Resources.data_clipart_free_business_clipart_collection;
-            this.importBurn.Label = "Import Data";
-            this.importBurn.Name = "importBurn";
-            this.importBurn.ShowImage = true;
-            this.importBurn.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.importBurn_Click);
             // 
             // group1
             // 
